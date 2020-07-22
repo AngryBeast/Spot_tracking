@@ -47,3 +47,5 @@
 ..\obj\main.o: ..\HARDWARE\OLED\OLED.h
 ..\obj\main.o: ..\HARDWARE\IIC\myiic.h
 ..\obj\main.o: ..\HARDWARE\PWM\pwm.h
+..\obj\main.o: KeyBoard.h
+..\obj\main.o: D:\keil5MDK\ARM\ARMCC\Bin\..\include\math.h

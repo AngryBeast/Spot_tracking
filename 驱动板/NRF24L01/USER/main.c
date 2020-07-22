@@ -9,7 +9,9 @@
 #include "OLED.h"
 #include "myiic.h"
 #include "pwm.h"
+#include "KeyBoard.h"
 #include <math.h>
+#include <stdlib.h>
 
 
 #define SIZE sizeof(TEXT_Buffer)	 
@@ -22,13 +24,18 @@
  #define SPEED_INIT 900
 void X_Steering(int yaw);
 void Y_Steering(int roll);
-int las_roll,las_yaw;
+//int las_roll,las_yaw;
 
 int main(void)
 { 
 	u16 t=0;			 
 	u8 tmp_buf[33];	
+	u16 temp = 0;
+	char X_date[5];
+	char Y_date[5];
 	int roll,pitch,temperature,yaw;
+	int X_coordinate,Y_coordinate;
+	//int X_coordinate,Y_coordinate;
 //	int las_roll,las_pitch,las_temperature,las_yaw;
 	int Product_multiple;
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
@@ -36,80 +43,57 @@ int main(void)
 	uart_init(115200);	//初始化串口波特率为115200
 	LED_Init();					//初始化LED  
 	IIC_Init();
- 	NRF24L01_Init();    		//初始化NRF24L01 
+	KeyBoard_Init();
 	TIM14_PWM_Init(3333-1,84-1);	//84M/84=1Mhz的计数频率,重装载值3333，所以PWM频率为 1M/3333.3333=300hz.  飞思卡尔S-D5舵机  
-//	TIM13_PWM_Init(1000-1,84-1);	//1M/1000 = 1000HZ, T = 1ms
-	//TIM41_PWM_Init(3333-1,84-1);  //B6
-	
-	//TIM42_PWM_Init(3333-1,84-1);
 	
 	TIM13_PWM_Init(3333-1,84-1);
 	
 	//F9舵机   B6左 B7右
 	TIM_SetCompare1(TIM14,MID);			//mid 电机归中
 	TIM_SetCompare1(TIM4,MID);
-	las_roll = las_yaw = MID;
+	//las_roll = las_yaw = MID;
 	printf("Init seccess\n");
 	delay_ms(10);	
-	while(NRF24L01_Check())
-	{
-		OLED_P8x16Str(0,0,"NRF24L01 Error");
-		delay_ms(400);
-	}
-		NRF24L01_RX_Mode();		  
 		while(1)
 		{	  		  
 			
-			if(NRF24L01_RxPacket(tmp_buf)==0)//一旦接收到信息,则显示出来.
-			{
-				tmp_buf[32]=0;//加入字符串结束符
-				
-				//数据分析
-				if(tmp_buf[0] == 0)
-					roll = -tmp_buf[1];
-				else
-					roll = tmp_buf[1];
-				if(tmp_buf[2] == 0)
-					pitch	= -tmp_buf[3];
-				else
-					pitch = tmp_buf[3];
-				
-				if(tmp_buf[4] == 0)
-					yaw = -tmp_buf[5];
-				else
-					yaw = tmp_buf[5];
-				
-				Product_multiple = tmp_buf[6];
-				
-				
-				
+		
 				delay_ms(10);
 				
-//				roll = Product_multiple*roll /10;
-//				yaw = Product_multiple*yaw /10;
-//				pitch = Product_multiple*pitch /10;
+//				temp = KeyBoard_scan();
+//				printf("key = %d",KeyBoard_scan());
 				
-				//printf("roll = %d,pitch = %d \n\n",roll,pitch);
-				
-				
-				if (t % 10 == 0)
-				{
-					if (yaw != las_yaw)
-					{
-						X_Steering(yaw);
-					}
+			read_keyBoard(X_date);
+			delay_ms(1);
+			read_keyBoard(Y_date);
+			
+			X_coordinate = atoi(X_date);
+			printf("X = %d/r/n",X_coordinate );
+			delay_ms(10);
+			Y_coordinate = atoi(Y_date);
+			printf("Y = %d/r/n",Y_coordinate );
+			
+			X_Steering(X_coordinate);
+			delay_ms(1);
+			Y_Steering(Y_coordinate);
+			
+			
+//				if (t % 10 == 0)
+//				{
+//					if (yaw != las_yaw)
+//					{
+//						X_Steering(yaw);
+//					}
 
-					if (roll != las_roll)
-					{
-						Y_Steering(roll);
-					}
-					
-				}
+//					if (roll != las_roll)
+//					{
+//						Y_Steering(roll);
+//					}
+//					
+//				}
 
 				
-				delay_ms(10);
-				
-			}else delay_us(100);	 
+				delay_ms(10); 
 			t++; 
 		};	
 	
@@ -117,28 +101,31 @@ int main(void)
 }
 
 
-void Y_Steering(int roll)			//+260
+void Y_Steering(int Y)			//+260
 {
-//		TIM_SetCompare1(TIM13,MID + roll);
-	
 //		int result = (int)(2.6 *(roll*10));
-		int result = (int)(2.6 *roll);
-		las_roll = roll;
-		printf("Y = %d\n",result + MID);
+		int result = (int)(2.6 *Y);
+		//las_roll = roll;
+		printf("Y Zhankong= %d\r\n",result + MID);
 		TIM_SetCompare1(TIM13,MID + result);
 		delay_ms(10);
 }
 
 
 
-void X_Steering(int yaw)			//+-150
+void X_Steering(int X)			//+-150
 {
 	//TIM_SetCompare1(TIM14,MID+ yaw);
 //	int result = 3 * (yaw/10);
 
-	int result = 3 * yaw;
-	las_yaw = yaw;
-	printf("X = %d\n",result + MID);
+	int result;
+	if (X < 25)
+		//result = 5.4 * (25-X);
+		result = 135/25 * (25-X);
+	else
+		result = -(150/25 * (X-25));
+	//las_yaw = yaw;
+	printf("X Zhankong= %d\r\n",result + MID);
 	TIM_SetCompare1(TIM14,MID+ result);
 	delay_ms(10);
 }

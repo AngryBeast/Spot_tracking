@@ -468,6 +468,11 @@
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\PWM\pwm.c</FilePath>
             </File>
+            <File>
+              <FileName>KeyBoard.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\KeyBoard.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
