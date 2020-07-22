@@ -100,7 +100,8 @@ int main(void)
 				LCD_ShowString(30,310,200,16,16,"N_ROLL=");
 				LCD_ShowNum(30+48+8,310,roll*10/10,3,16);		//显示整数部分	    
 				LCD_ShowNum(30+48+40,310,(short)roll*10%10,1,16);		//显示小数部分 
-		
+				
+		Sentdate(tmp_buf,Product_multiple,roll,yaw);
 		
 //		roll = filter(roll_buf);			//滤波以后
 //		pitch = filter(pitch_buf);
@@ -122,7 +123,7 @@ int main(void)
 				
 				case KEY2_PRES:
 				{
-					Sentdate(tmp_buf,Product_multiple,roll,yaw);
+					//Sentdate(tmp_buf,Product_multiple,roll,yaw);
 				}
 				
 			}
@@ -131,6 +132,7 @@ int main(void)
 		
 		if((t%10)==0)
 			{ 
+				
 				if(temp<0)
 				{
 					LCD_ShowChar(30+48,230,'-',16,0);		//显示负号
@@ -141,7 +143,7 @@ int main(void)
 				temp=pitch*10;
 				if(temp<0)
 				{
-					LCD_ShowChar(30+48,250,'-',16,0);		//显示负号
+					LCD_ShowChar(30+48,250,'-',16,0);		//显示负号 
 					temp=-temp;		//转为正数
 				}else LCD_ShowChar(30+48,250,' ',16,0);		//去掉负号 
 				LCD_ShowNum(30+48+8,250,temp/10,3,16);		//显示整数部分	    
@@ -183,24 +185,25 @@ void Sentdate(u8* tmp_buf,float Product_multiple,int roll,int yaw	)
 			if (roll < 0)					//将数据存入寄存器中准备发送
 			{
 				tmp_buf[0] = 0;
-				tmp_buf[1] = -(int)(Product_multiple*roll);
+				tmp_buf[1] = -roll;
 			}
 			else
 			{				
 				tmp_buf[0] = 1;
-				tmp_buf[1] = (int)(Product_multiple*roll);
+				tmp_buf[1] = roll;
 			}
 						
 			if(yaw < 0)
 			{
 				tmp_buf[4] = 0;
-				tmp_buf[5] = -(int)(Product_multiple*yaw);
+				tmp_buf[5] = -yaw;
 			}
 			else
 			{
 				tmp_buf[4] = 1;
-				tmp_buf[5] = (int)(Product_multiple*yaw);
+				tmp_buf[5] = yaw;
 			}
+			tmp_buf[6] = Product_multiple *10;
 			tmp_buf[32]=0;//加入结束符		   
 		}else
 		{										   	

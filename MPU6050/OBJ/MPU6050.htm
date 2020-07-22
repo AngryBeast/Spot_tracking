@@ -3,7 +3,7 @@
 <title>Static Call Graph - [..\OBJ\MPU6050.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image ..\OBJ\MPU6050.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Sun Jul 19 17:42:52 2020
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Tue Jul 21 20:50:44 2020
 <BR><P>
 <H3>Maximum Stack Usage =        392 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -309,7 +309,7 @@ Global Symbols
 <BR><BR>[Calls]<UL><LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;_sys_exit
 </UL>
 
-<P><STRONG><a name="[88]"></a>Sentdate</STRONG> (Thumb, 188 bytes, Stack size 32 bytes, main.o(.text))
+<P><STRONG><a name="[88]"></a>Sentdate</STRONG> (Thumb, 126 bytes, Stack size 32 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = Sentdate &rArr; LCD_Fill &rArr;  LCD_Fill (Cycle)
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;NRF24L01_TxPacket
@@ -319,7 +319,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[82]"></a>main</STRONG> (Thumb, 1494 bytes, Stack size 112 bytes, main.o(.text))
+<P><STRONG><a name="[82]"></a>main</STRONG> (Thumb, 1488 bytes, Stack size 112 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 392 + Unknown Stack Size
 <LI>Call Chain = main &rArr; mpu_dmp_get_data &rArr; dmp_read_fifo &rArr; mpu_read_fifo_stream &rArr; mpu_reset_fifo &rArr; MPU_Write_Len &rArr; IIC_Send_Byte
 </UL>

@@ -9,6 +9,8 @@
 #include "OLED.h"
 #include "myiic.h"
 #include "pwm.h"
+#include <math.h>
+
 
 #define SIZE sizeof(TEXT_Buffer)	 
 	
@@ -20,13 +22,15 @@
  #define SPEED_INIT 900
 void X_Steering(int yaw);
 void Y_Steering(int roll);
-short speed_flag = 0;
+int las_roll,las_yaw;
 
 int main(void)
 { 
 	u16 t=0;			 
 	u8 tmp_buf[33];	
 	int roll,pitch,temperature,yaw;
+//	int las_roll,las_pitch,las_temperature,las_yaw;
+	int Product_multiple;
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 	delay_init(168);  //初始化延时函数
 	uart_init(115200);	//初始化串口波特率为115200
@@ -44,6 +48,7 @@ int main(void)
 	//F9舵机   B6左 B7右
 	TIM_SetCompare1(TIM14,MID);			//mid 电机归中
 	TIM_SetCompare1(TIM4,MID);
+	las_roll = las_yaw = MID;
 	printf("Init seccess\n");
 	delay_ms(10);	
 	while(NRF24L01_Check())
@@ -64,7 +69,6 @@ int main(void)
 					roll = -tmp_buf[1];
 				else
 					roll = tmp_buf[1];
-				
 				if(tmp_buf[2] == 0)
 					pitch	= -tmp_buf[3];
 				else
@@ -75,23 +79,35 @@ int main(void)
 				else
 					yaw = tmp_buf[5];
 				
-				if(tmp_buf[6] == 0)
-					temperature = -tmp_buf[7];
-				else
-					temperature = tmp_buf[7];
+				Product_multiple = tmp_buf[6];
+				
+				
+				
+				delay_ms(10);
+				
+//				roll = Product_multiple*roll /10;
+//				yaw = Product_multiple*yaw /10;
+//				pitch = Product_multiple*pitch /10;
+				
+				//printf("roll = %d,pitch = %d \n\n",roll,pitch);
+				
+				
+				if (t % 10 == 0)
+				{
+					if (yaw != las_yaw)
+					{
+						X_Steering(yaw);
+					}
+
+					if (roll != las_roll)
+					{
+						Y_Steering(roll);
+					}
 					
-				speed_flag = tmp_buf[8];
+				}
+
+				
 				delay_ms(10);
-				
-				
-				
-				printf("roll = %d,pitch = %d \n\n",roll,pitch);
-				
-				X_Steering(yaw);
-			
-				Y_Steering(roll);
-				delay_ms(10);
-				
 				
 			}else delay_us(100);	 
 			t++; 
@@ -101,50 +117,28 @@ int main(void)
 }
 
 
-void Y_Steering(int roll)
+void Y_Steering(int roll)			//+260
 {
-
-//		TIM_SetCompare1(TIM4,MID + pitch);
-//	  TIM_SetCompare2(TIM4,MID + pitch);
-		TIM_SetCompare1(TIM13,MID + roll);
+//		TIM_SetCompare1(TIM13,MID + roll);
+	
+//		int result = (int)(2.6 *(roll*10));
+		int result = (int)(2.6 *roll);
+		las_roll = roll;
+		printf("Y = %d\n",result + MID);
+		TIM_SetCompare1(TIM13,MID + result);
 		delay_ms(10);
-	//		int speed;
-////		speed = SPEED_INIT;
-//		
-//		if (pitch > -3&&pitch <3)
-//		{
-//			TIM_SetCompare1(TIM4,0);
-//			TIM_SetCompare2(TIM4,0);
-//			return;
-//		}
-//		if (speed_flag)
-//		{
-//			speed = 130;
-//		}
-//		else
-//			speed = 80;
-//		if (pitch < 0)
-//			speed = speed - pitch;
-//		if (pitch > 0)
-//			speed = speed + pitch;
-//		if (pitch < -3)
-//		{ 
-//			TIM_SetCompare1(TIM4,speed);
-//			TIM_SetCompare2(TIM4,0);
-//		}
-//		if (pitch > 3)
-//		{
-//			TIM_SetCompare2(TIM4,speed);
-//			TIM_SetCompare1(TIM4,0);
-//		}
-//		delay_ms(10);
 }
 
 
 
-void X_Steering(int yaw)
+void X_Steering(int yaw)			//+-150
 {
-	//TIM_SetCompare1(TIM14,MID+ 5*roll);
-	TIM_SetCompare1(TIM14,MID+ yaw);
+	//TIM_SetCompare1(TIM14,MID+ yaw);
+//	int result = 3 * (yaw/10);
+
+	int result = 3 * yaw;
+	las_yaw = yaw;
+	printf("X = %d\n",result + MID);
+	TIM_SetCompare1(TIM14,MID+ result);
 	delay_ms(10);
 }
