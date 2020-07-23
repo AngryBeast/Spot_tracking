@@ -51,7 +51,6 @@ int KeyBoard_scan()
 	return ret;
 }
 
-
 void read_keyBoard(char *p) 
 {
 	u8 ret,i=0,flag=0;
@@ -74,6 +73,16 @@ void read_keyBoard(char *p)
 				flag=1;
 				return;
 			}
+//			else if(Key_array[ret] == 'B')	//按下D键，默认输入0；
+//			{
+//				flag=1;
+//				return 1;   //模式1
+//			}
+//			else if(Key_array[ret] == 'C')	//按下D键，默认输入0；
+//			{
+//				flag=1;
+//				return 2;   //模式2
+//			}
 			else if(Key_array[ret] == 'A')	//第一个按下A ，返回负数
 			{
 				p[i]='-';
@@ -85,7 +94,6 @@ void read_keyBoard(char *p)
 				flag=1;
 			}
 			
-			//OLED_ShowChar(10,30,Key_array[ret],16,1);
 		}
 		
 		if(ret == 255&&flag==1)
@@ -94,6 +102,5 @@ void read_keyBoard(char *p)
 				flag =0;
 				i++;
 			}
-		//OLED_Refresh_Gram();
 	}
 }
