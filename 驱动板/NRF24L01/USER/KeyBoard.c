@@ -56,7 +56,11 @@ void read_keyBoard(char *p)
 	u8 ret,i=0,flag=0;
 	while(Key_array[KeyBoard_scan()] == '*')
 	{}
-		
+	for (;i<5;i++)
+	{
+		p[i] = ' ';
+	}
+	i = 0;
 	while(i<5)
 	{
 		ret = KeyBoard_scan();
@@ -86,6 +90,11 @@ void read_keyBoard(char *p)
 			else if(Key_array[ret] == 'A')	//第一个按下A ，返回负数
 			{
 				p[i]='-';
+				flag=1;
+			}
+			else if(Key_array[ret] == '#')	//#为小数点
+			{
+				p[i]='.';
 				flag=1;
 			}
 			else

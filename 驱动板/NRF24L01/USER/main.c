@@ -40,68 +40,60 @@ int main(void)
 	char Mode_date[5];
 	int roll,pitch,temperature,yaw;
 	int X_coordinate,Y_coordinate,Mode_coordinate;
-	//int X_coordinate,Y_coordinate;
-//	int las_roll,las_pitch,las_temperature,las_yaw;
 	int Product_multiple;
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//设置系统中断优先级分组2
 	delay_init(168);  //初始化延时函数
 	uart_init(115200);	//初始化串口波特率为115200
 	LED_Init();					//初始化LED  
 	IIC_Init();
+	OLED_Init();
 	KeyBoard_Init();
 	TIM14_PWM_Init(3333-1,84-1);	//84M/84=1Mhz的计数频率,重装载值3333，所以PWM频率为 1M/3333.3333=300hz.  飞思卡尔S-D5舵机  
-	
 	TIM13_PWM_Init(3333-1,84-1);
-	
-	//F9舵机   B6左 B7右
-	//TIM_SetCompare1(TIM14,MID);			//mid 电机归中
-	X_Steering(SOURCE);
+	OLED_P8x16Str(0,0,"X=");
+	OLED_P8x16Str_single(16,0,X_now);
+	OLED_P8x16Str(64,0,"Y=");
+	OLED_P8x16Str_single(80,0,Y_now);
+	X_Steering(SOURCE);							//刚开始时指向原点
 	Y_Steering(MID);
-	//las_roll = las_yaw = MID;
 	printf("Init seccess\n");
 	delay_ms(10);	
 		while(1)
 		{	  		  
 			
-		
-				delay_ms(10);
+			OLED_P8x16Str_single(16,0,X_now/10);			//显示X和Y坐标
+			OLED_P8x16Str_single(24,0,X_now%10);
+			OLED_P8x16Str_single(80,0,Y_now/10);
+			OLED_P8x16Str_single(88,0,Y_now%10);
+			delay_ms(10);
 				
-			read_keyBoard(Mode_date);
+			read_keyBoard(Mode_date);								//从矩阵键盘中读入模式选项
 			Mode_coordinate = atoi(Mode_date);
 			switch(Mode_coordinate)
 			{
-				case 0:
+				case 0:																//移动至点模式
 								printf("PointMode");
-								read_keyBoard(X_date);
+								read_keyBoard(X_date);				//从矩阵键盘中读取值
 								delay_ms(1);
 								read_keyBoard(Y_date);
 			
-								X_coordinate = atoi(X_date);
+								X_coordinate = atoi(X_date);					//将其转化为整形
 								printf("X = %d/r/n",X_coordinate );
 								X_now = X_coordinate;
 								delay_ms(10);
 								Y_coordinate = atoi(Y_date);
 								printf("Y = %d/r/n",Y_coordinate );
 								Y_now = Y_coordinate;
-			
+				
 								X_Steering(X_data_processing(X_coordinate));
 								delay_ms(1);
 								Y_Steering(Y_data_processing(Y_coordinate));
 								break;
-				case 1:
-					printf("XieLvMode");
-					XieLv_line();
-//								read_keyBoard(Mode_date);
-//								Mode_coordinate = atoi(Mode_date);
-//								
-//								if (50 - Y_now < Mode_coordinate * (50 - X_now))
-//								{
-//									
-//								}
-//								else
-//								{
-//									
-//								}
+				
+				
+				case 1:																//画线模式
+								printf("XieLvMode");
+								XieLv_line();
 								break;
 			}
 			
@@ -124,38 +116,45 @@ int main(void)
 }
 
 
-void XieLv_line()
+void XieLv_line()					//第三题画线函数
 {
 	char Xielv_date[5];
-	int Xielv_coordinate;
+	float Xielv_coordinate;
 	int temp;
 	int X_zhankong,Y_zhankong;
 	int X_zhankong_now,Y_zhankong_now;
+	int X_temp_now,Y_temp_now;
 	//float X_zhankong_now_f,Y_zhankong_now_f;
 	int count = 0,flag;
 	int Result_X_now,Result_Y_now;
-	read_keyBoard(Xielv_date);
-	Xielv_coordinate = atoi(Xielv_date);
+	read_keyBoard(Xielv_date);				//从矩阵键盘读取输入的数据
+	Xielv_coordinate = atof(Xielv_date);	//将数据转从字符数组型化成浮点型
+//	OLED_P8x16Str(0,32,"xielv=");
+//	OLED_P8x16Str_single(64,32,(int)Xielv_coordinate);
+//	OLED_P8x16Str(72,32,".");
+//	OLED_P8x16Str_single(80,32,(int)Xielv_coordinate*10%10);
 	if (50 - Y_now < Xielv_coordinate * (50 - X_now))		//Y先到达边界
 	{
-		temp = 50 / (float)Xielv_coordinate - X_now;
-		
-		Y_zhankong = Y_data_processing(50);
-		X_zhankong = X_data_processing(temp);
+		temp = (int)((float)50 / Xielv_coordinate - X_now);		//求出Y到达边界时X的值
+		printf(" temp =  %d",(int)((float)50 / Xielv_coordinate));
+		//Y_zhankong = Y_data_processing(50);
+		//X_zhankong = X_data_processing(temp);
 		
 		Result_Y_now = 50;
-		Result_X_now = temp;
+		Result_X_now = temp;					//X和Y的最终移动结果
 		
 		printf("Result_Y_now = %d,Result_X_now = %d",Result_Y_now,Result_X_now);
 		
-		flag = 1;
+		flag = 1;			//Y先到达边界的情况
 	}
-	else
+	else					//X先到达边界
 	{
-		temp = 50 / (float)Xielv_coordinate - Y_now;
+		//printf(" Y_now = %d",Y_now);
+		//printf(" temp =  %d",(int)((float)50 / Xielv_coordinate));
+		temp = (int)(((float)50 / Xielv_coordinate) - Y_now);
 		
-		Y_zhankong = Y_data_processing(temp);
-		X_zhankong = X_data_processing(50);	
+		//Y_zhankong = Y_data_processing(temp);
+		//X_zhankong = X_data_processing(50);	
 		
 		Result_X_now = 50;
 		Result_Y_now = temp;
@@ -165,52 +164,50 @@ void XieLv_line()
 		flag = 0;
 	}
 	
-	Y_zhankong_now = Y_data_processing(Y_now);
+	Y_zhankong_now = Y_data_processing(Y_now); 		//好像没用到
 	X_zhankong_now = X_data_processing(X_now);
-	//Y_zhankong_now_f = Y_data_processing(Y_now);
-	//X_zhankong_now_f = X_data_processing(X_now);
 	
-	
-	while(Y_zhankong_now < Y_zhankong || X_zhankong_now > X_zhankong)
+	Y_temp_now = Y_now;			//X的当前坐标，其实是题目要求0,0
+	X_temp_now = X_now;
+
+	while(Y_temp_now < Result_Y_now || X_temp_now < Result_X_now)				//当X或Y没有移动到终点时执行循环
 	{
-		if (Y_zhankong_now < Y_zhankong)
+		if (flag == 1)											//根据斜率来控制移动的比率
 		{
-			Y_Steering(Y_zhankong_now);
-			//Y_zhankong_now_f += 1 * (float)Xielv_coordinate;
-			//Y_zhankong_now = (int)Y_zhankong_now_f;
-			//Y_zhankong_now += 1;
-			delay_ms(5);
-		}
-		if (X_zhankong_now > X_zhankong)
-		{
-			X_Steering(X_zhankong_now);
-			//X_zhankong_now_f -= 1 / (float)Xielv_coordinate;
-			//X_zhankong_now = (int)X_zhankong_now_f;
-			delay_ms(5);
-		}
-		if (flag == 1)
-		{
-			Y_zhankong_now += 1;
-			if (count % Xielv_coordinate == 0)
-				X_zhankong_now -= 1;
+			Y_temp_now += 1;
+			if (count % (int)Xielv_coordinate == 0)
+				X_temp_now += 1;
 		}
 		else
 		{
-			X_zhankong_now -= 1;
-			if (count % Xielv_coordinate == 0)
-				Y_zhankong_now += 1;
+			X_temp_now += 1;
+			if (count % (int)Xielv_coordinate == 0)
+				Y_temp_now += 1;
 		}
+		
+		if (Y_temp_now < Result_Y_now)			//Y没有移动到Y的终点
+		{
+			Y_Steering(Y_data_processing(Y_temp_now));					//根据当前的点的坐标读出占空比的值再控制舵机
+			delay_ms(5);
+		}
+		if (X_temp_now < Result_X_now)
+		{
+			X_Steering(X_data_processing(X_temp_now));
+			delay_ms(5);
+		}
+		
 		count++;
+		
 	}
 	
-	X_now = Result_X_now;
+	X_now = Result_X_now;				
 	Y_now = Result_Y_now;
 	
 }
 
 
 
-void Y_Steering(int Y)			//+260
+void Y_Steering(int Y)			//输入占空比控制舵机
 {
 		printf("Y Zhankong= %d\r\n",Y);
 		TIM_SetCompare1(TIM13,Y);
@@ -226,7 +223,7 @@ void X_Steering(int X)			//+-150
 		delay_ms(10);
 }
 
-int X_data_processing(int X)
+int X_data_processing(int X)			//根据输入的X读出占空比
 {
 	int X_zhankong = SOURCE;
 	//printf("X = %d\r\n",X);
