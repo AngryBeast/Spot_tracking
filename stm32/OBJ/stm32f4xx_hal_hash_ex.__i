@@ -1,0 +1,7 @@
+-c --cpu Cortex-M4.fp -g -O2 --apcs=interwork --split_sections -I..\CORE -I..\OBJ -I..\USER -I..\HALLIB\STM32F4xx_HAL_Driver\Inc -I..\SYSTEM\delay -I..\SYSTEM\sys -I..\SYSTEM\usart -I..\HARDWARE\LED -I..\my
+-I C:\Users\97463\Desktop\stm32\USER\RTE
+-I D:\keil5MDK\ARM\PACK\Keil\STM32F4xx_DFP\2.9.0
+-I D:\keil5MDK\ARM\CMSIS\Include
+-I D:\keil5MDK\ARM\PACK\Keil\STM32F4xx_DFP\2.9.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include
+-D__UVISION_VERSION="514" -DSTM32F429xx -DUSE_HAL_DRIVER -DSTM32F429xx --C99
+-o ..\obj\stm32f4xx_hal_hash_ex.o --omf_browse ..\obj\stm32f4xx_hal_hash_ex.crf --depend ..\obj\stm32f4xx_hal_hash_ex.d "..\HALLIB\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_hash_ex.c"
